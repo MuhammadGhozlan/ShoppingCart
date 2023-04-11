@@ -10,7 +10,6 @@ using System.Security.Cryptography;
 namespace ShoppingCart.Areas.Admin.Controllers
 {
     [Area("Admin")]
-
     public class ProductsController : Controller
     {
         private readonly DataContext _context;
@@ -44,9 +43,11 @@ namespace ShoppingCart.Areas.Admin.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Product product)
         {
+           
             ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
-            //if (ModelState.IsValid)
-            //{
+            
+
+            if (ModelState.IsValid) {
                 product.Slug = product.Name.ToLower().Replace(" ", "-");
                 var slug = await _context.Products.FirstOrDefaultAsync(p => p.Slug == product.Slug);
                 if (slug != null)
@@ -69,18 +70,24 @@ namespace ShoppingCart.Areas.Admin.Controllers
                     product.Image = imageName;
 
                 }
-                _context.Products.Add(product);
+                _context.Add(product);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "The Product has been created!";
                 return RedirectToAction("Index");
-            //}
+            }
             return View(product);
 
         }
 
+        public async Task<IActionResult> Edit(long id)
+        {
+            Product product = await _context.Products.FindAsync(id);
+            ViewBag.Categories = new SelectList(_context.Categories, "Id", "Name", product.CategoryId);
+
+            return View(product);
+        }
 
     }
 }
-
 
 
